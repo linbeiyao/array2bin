@@ -1,0 +1,3 @@
+﻿  src_manager.cpp
+C:\Users\Linbei\Documents\Code\array2bin\array2bin\array2bin\src_manager.cpp(86,1): warning C4715: “get_src_data_datasize”: 不是所有的控件路径都返回值
+  array2bin.vcxproj -> C:\Users\Linbei\Documents\Code\array2bin\array2bin\x64\Debug\array2bin.exe
