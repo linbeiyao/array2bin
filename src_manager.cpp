@@ -61,7 +61,7 @@ void reg_src_data(tImage* src, const char *name, size_t addr) {
     reg_src_image_count++;
 }
 
-void reg_src_data(tFont* src, const char *name) {
+void reg_src_data(tFont* src, const char *name, size_t addr) {
     src_font_array.push_back(src);
     fonts_name.push_back(name);
     reg_src_count++;
