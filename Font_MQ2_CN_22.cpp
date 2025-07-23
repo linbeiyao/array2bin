@@ -1591,4 +1591,4 @@ static const tChar Font_MQ2_CN_22_array[] = {
        {0xe9878f, &Font_MQ2_CN_22_0xe9878f}
     };
 
-const tFont Font_MQ2_CN_22 = {27, Font_MQ2_CN_22_array};
+tFont Font_MQ2_CN_22 = {27, Font_MQ2_CN_22_array};

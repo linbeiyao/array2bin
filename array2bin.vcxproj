@@ -127,6 +127,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Font_MQ2_CN_14.cpp" />
+    <ClCompile Include="Font_MQ2_CN_22.cpp" />
     <ClCompile Include="Font_MQ2_EN_22.cpp" />
     <ClCompile Include="Image_MQ2_LOGO.cpp" />
     <ClCompile Include="main.cpp" />

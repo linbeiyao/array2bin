@@ -27,6 +27,12 @@
     <ClCompile Include="Font_MQ2_EN_22.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Font_MQ2_CN_14.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Font_MQ2_CN_22.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src_manager.hpp">

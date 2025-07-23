@@ -11,19 +11,23 @@
 constexpr const char* OUT_FILE_NAME = "demo.bin";
 
 
-extern std::vector<std::string> images_name;
-extern std::vector<std::string> fonts_name;
 
 int main() {
     src_manager_init();
+
+
 
     std::ofstream outfile(OUT_FILE_NAME, std::ios::binary);
 
     std::map<std::string, size_t> src_addr_map;
 
-    size_t offset = 0;
-    src_manager_write_image(outfile, src_addr_map, offset);
-    src_manager_write_font(outfile, src_addr_map, offset);
+
+    src_manager_write_data(outfile, src_addr_map);
+    
+    src_manager_verify_data();
+
+
+
 
     outfile.close();
 
