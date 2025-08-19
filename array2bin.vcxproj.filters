@@ -13,25 +13,61 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="资源文件\MQ_V2_节电小能手">
+      <UniqueIdentifier>{793cb957-24bb-4015-91dd-38d39122a484}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="资源文件\MQ2_V3_ECOSAVER">
+      <UniqueIdentifier>{d0fccd21-5ea4-4d64-ac3b-e3b7a07bbf72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="资源文件\MQ2_V1">
+      <UniqueIdentifier>{d971a968-5a58-46aa-b2e6-1068c2a74811}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Image_MQ2_LOGO.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="src_manager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Font_MQ2_EN_22.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="MQ2_V2_ 节电小能手\Font_MQ_V2_CN_14.cpp">
+      <Filter>资源文件\MQ_V2_节电小能手</Filter>
     </ClCompile>
-    <ClCompile Include="Font_MQ2_CN_14.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="MQ2_V2_ 节电小能手\Font_MQ_V2_EN_16.cpp">
+      <Filter>资源文件\MQ_V2_节电小能手</Filter>
     </ClCompile>
-    <ClCompile Include="Font_MQ2_CN_22.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="MQ2_V2_ 节电小能手\Font_MQ_V2_EN_22.cpp">
+      <Filter>资源文件\MQ_V2_节电小能手</Filter>
+    </ClCompile>
+    <ClCompile Include="MQ2_V2_ 节电小能手\Font_MQ_V2_CN_22.cpp">
+      <Filter>资源文件\MQ_V2_节电小能手</Filter>
+    </ClCompile>
+    <ClCompile Include="MQ2_V2_ 节电小能手\Font_MQ_V2_CN_16.cpp">
+      <Filter>资源文件\MQ_V2_节电小能手</Filter>
+    </ClCompile>
+    <ClCompile Include="MQ2_V3_ECOSAVER\Font_MQ_V3_EN_14.cpp">
+      <Filter>资源文件\MQ2_V3_ECOSAVER</Filter>
+    </ClCompile>
+    <ClCompile Include="MQ2_V3_ECOSAVER\Font_MQ_V3_EN_16.cpp">
+      <Filter>资源文件\MQ2_V3_ECOSAVER</Filter>
+    </ClCompile>
+    <ClCompile Include="MQ2_V3_ECOSAVER\Font_MQ_V3_EN_22.cpp">
+      <Filter>资源文件\MQ2_V3_ECOSAVER</Filter>
+    </ClCompile>
+    <ClCompile Include="MQ2_V1\Image_MQ2_LOGO.cpp">
+      <Filter>资源文件\MQ2_V1</Filter>
+    </ClCompile>
+    <ClCompile Include="MQ2_V1\Font_MQ2_CN_14.cpp">
+      <Filter>资源文件\MQ2_V1</Filter>
+    </ClCompile>
+    <ClCompile Include="MQ2_V1\Font_MQ2_CN_22.cpp">
+      <Filter>资源文件\MQ2_V1</Filter>
+    </ClCompile>
+    <ClCompile Include="MQ2_V1\Font_MQ2_EN_22.cpp">
+      <Filter>资源文件\MQ2_V1</Filter>
+    </ClCompile>
+    <ClCompile Include="include_src.hpp">
+      <Filter>头文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

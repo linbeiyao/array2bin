@@ -2,36 +2,51 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <stdio.h>
 
 
 #include "src_manager.hpp"
+
 
 
 uint16_t reg_src_count = 0;
 uint16_t reg_src_image_count = 0;
 uint16_t reg_src_font_count = 0;
 
-
-
-
+src_head_t src_head;
 std::vector<src_item_t> src_item_array;
 
+// 构建资源地址表（将所有资源的地址信息填充到 addr_table）
+static void build_src_addr_table(src_item_t& src_item);
 
+// 单个资源注册接口（start_addr 可选，默认0x0）
+static void reg_src_data(void* src, const char* name, is_type_e type, size_t start_addr = 0x0);
 
+// 获取资源数据字节数（单位：byte）
+static size_t get_src_data_datasize(size_t index);
 
+// 获取资源类型
+static is_type_e is_src_type(size_t index);
 
-#define IMAGE_LOGO_MQ_ADDR 0x00000000
-#define FONT_MQ2_CN_22_ADDR 0x00005000
-#define FONT_MQ2_EN_22_ADDR 0x0000E000
-#define FONT_MQ2_CN_14_ADDR 0x00015000
+// 获取图片资源的位大小（单位：bit）
+static size_t get_src_data_size(const tImage* image);
 
+// 获取字体中某字符图像的位大小（单位：bit）
+static size_t get_src_data_size(const tFont* font, size_t font_image_index);
 
 void src_manager_init() {  
     // 注册源数据  
-    reg_src_data(&logo_MQ, "logo_MQ", is_image, IMAGE_LOGO_MQ_ADDR);
-    reg_src_data(&Font_MQ2_CN_22, "MQ2_CN_22", is_font, FONT_MQ2_CN_22_ADDR);
-    reg_src_data(&Font_MQ2_EN_22, "MQ2_EN_22", is_font, FONT_MQ2_EN_22_ADDR);  
-    reg_src_data(&Font_MQ2_CN_14, "MQ2_CN_14", is_font, FONT_MQ2_CN_14_ADDR);
+    //reg_src_data(&logo_MQ, "logo_MQ", is_image, IMAGE_LOGO_MQ_ADDR);
+    //reg_src_data(&Font_MQ2_CN_22, "MQ2_CN_22", is_font, FONT_MQ2_CN_22_ADDR);
+    //reg_src_data(&Font_MQ2_EN_22, "MQ2_EN_22", is_font, FONT_MQ2_EN_22_ADDR);  
+    //reg_src_data(&Font_MQ2_CN_14, "MQ2_CN_14", is_font, FONT_MQ2_CN_14_ADDR);
+
+    reg_src_data(&logo_MQ, "logo_MQ", is_image);
+    reg_src_data(&Font_MQ2_CN_22, "MQ2_CN_22", is_font);
+    reg_src_data(&Font_MQ2_EN_22, "MQ2_EN_22", is_font);
+    reg_src_data(&Font_MQ2_CN_14, "MQ2_CN_14", is_font);
+
+
 
     // 按照地址进行排序
     std::sort(src_item_array.begin(), src_item_array.end(), [](const src_item_t& a, const src_item_t& b) {
@@ -39,12 +54,8 @@ void src_manager_init() {
     });
 
 
-    
+    printf("源数据注册完成，注册数据个数：%d，image count:%d font count:%d\n", reg_src_count, reg_src_image_count, reg_src_font_count);
 
-    std::cout << "源数据注册完成" << std::endl
-        << "注册源数据个数：" << reg_src_count << std::endl
-        << "注册图片个数：" << reg_src_image_count << std::endl
-        << "注册字体个数：" << reg_src_font_count << std::endl;
 
     // 输出每个资源的地址和大小
     std::cout << "资源地址及大小列表：" << std::endl;
@@ -55,6 +66,9 @@ void src_manager_init() {
                   << " | 大小: " << std::dec << item.data_byte_count << " 字节"
                   << std::endl;
     }
+
+
+
 }  
 
 void src_manager_deinit(){
@@ -63,6 +77,38 @@ void src_manager_deinit(){
     reg_src_image_count = 0;
     reg_src_font_count = 0;
 }
+
+
+void creat_flash_data_head(std::string name, std::map<std::string, size_t>& addr_map){
+    // 使用 strncpy 拷贝字符串，确保不会越界
+    strncpy_s(src_head.version, name.c_str(), sizeof(src_head.version) - 1);
+    src_head.version[sizeof(src_head.version) - 1] = '\0'; // 确保以 '\0' 结尾
+    src_head.resource_count = reg_src_count;
+    src_head.font_count = reg_src_font_count;
+    src_head.image_count = reg_src_image_count;
+
+    // 计算数据的总大小
+    src_head.total_size = 0;
+    for(const auto& item : src_item_array){
+        src_head.total_size += static_cast<uint32_t>(item.data_byte_count); 
+    }
+    printf("数据大小：%dB 换算 %dKB %dB\n", src_head.total_size, src_head.total_size / 1024, src_head.total_size % 1024);
+
+    // 地址表的起始位置
+    src_head.addr_table_offset = src_item_array.back().end_addr + 1;
+
+    if(src_head.addr_table_offset % 4096 != 0) {
+        src_head.addr_table_offset = ((src_head.addr_table_offset / 4096) + 1) * 4096;
+    }
+
+    printf("地址表的保存地址：0x%08X\n", src_head.addr_table_offset);
+
+    // 计算地址表的总大小  
+    // is null
+
+
+}
+
 
 is_type_e is_src_type(size_t index) {
     if (index >= src_item_array.size()) {
@@ -74,27 +120,45 @@ is_type_e is_src_type(size_t index) {
 
 /**
  * addr 如果指定地址 也可以默认顺序存储
- * 仅添加功能，不影响兼容性
+ *
  */
-void reg_src_data(void* src, const char *name, is_type_e type, size_t addr = 0x00000000) {
+void reg_src_data(void* src, const char *name, is_type_e type, size_t start_addr) {
+    
+    // 取最后一个已注册的资源项
+    if (!src_item_array.empty()) {
+        const src_item_t& last = src_item_array.back();
+
+        // 检测地址是否有覆盖
+        if (last.end_addr > start_addr) {
+            // 如果有覆盖
+            start_addr = last.end_addr + 1;   // 依次往后排序
+        }
+    }
+
+
     // 添加到资源数组
-    src_item_array.push_back({src, type, name, addr});
+    src_item_array.push_back({src, type, name, start_addr});
 
     // 区分图片和字体的注册计数，并计算字节数（向上取整）
     if (type == is_image) {
         reg_src_image_count++;
         // 计算图片字节数，向上取整
         const tImage* img = static_cast<const tImage*>(src);
+
         if(img) {
             size_t bits = (img->width) * (img->height) * (img->dataSize);
             size_t bytes = (bits + 7) / 8; // 向上取整
             src_item_array.back().data_byte_count = bytes;
             // 计算结束地址
-            src_item_array.back().end_addr = addr + bytes - 1;
-        } else {
+            src_item_array.back().end_addr = start_addr + bytes - 1;
+
+            
+
+        } else {    // 如果为空
             src_item_array.back().data_byte_count = 0;
-            src_item_array.back().end_addr = addr;
+            src_item_array.back().end_addr = start_addr;
         }
+
     } else if (type == is_font) {
         reg_src_font_count++;
         // 计算字体字节数（所有字符图片的总和，向上取整）
@@ -112,14 +176,15 @@ void reg_src_data(void* src, const char *name, is_type_e type, size_t addr = 0x0
         }
         src_item_array.back().data_byte_count = total_bytes;
         // 计算结束地址
-        src_item_array.back().end_addr = addr + total_bytes - 1;
+        src_item_array.back().end_addr = start_addr + total_bytes - 1;
     } else {
         // 其他类型，结束地址等于起始地址
         src_item_array.back().data_byte_count = 0;
-        src_item_array.back().end_addr = addr;
+        src_item_array.back().end_addr = start_addr;
     }
     reg_src_count++;
 }
+
 
 
 
@@ -191,19 +256,34 @@ size_t get_src_data_size(const tFont* font, size_t font_image_index) {
     return bit_count;
 }
 
+void src_manager_write_head(std::ostream& os, src_head_t head){
+    // 写入前先将文件指针移动到文件开头（地址0）
+    os.seekp(0, std::ios::beg);
+    // 将数据头结构体按字节写入文件
+    os.write(reinterpret_cast<const char*>(&head), sizeof(src_head_t));
+    if (!os) {
+        std::cout << "写入数据头失败！" << std::endl;
+    } else {
+        std::cout << "数据头已写入，大小: " << sizeof(src_head_t) << " 字节" << std::endl;
+    }
+}
+
 void src_manager_write_data(std::ostream& os, std::map<std::string, size_t>& addr_map) {
     size_t current_offset = 0;
 
-    for (size_t i = 0; i < src_item_array.size(); ++i) {
+    for (size_t i = 0; i < src_item_array.size(); ++i) {        // 资源项
         src_item_t& item = src_item_array[i];
         if (!item.data) continue;
+
+        // 构建该项的地址表
+        build_src_addr_table(item);
 
         size_t datasize = get_src_data_datasize(i);
         size_t bit_len = 0;
         const uint16_t* data_ptr = nullptr;
         std::string key = item.name;
 
-        size_t target_addr = item.satrt_addr; // 资源的起始写入地址
+        size_t target_addr = item.satrt_addr; // 资源项的起始写入地址
 
         // 如果当前写入偏移 < 目标地址，填充 0xFF
         if (current_offset < target_addr) {
@@ -268,11 +348,45 @@ void src_manager_write_data(std::ostream& os, std::map<std::string, size_t>& add
             }
         }
 
+        // ================== 音频资源 ==================
+        else if (item.type == is_audio) {
+            // nothing
+        }
+
         else {
             std::cerr << "未知资源类型，跳过：" << key << std::endl;
         }
     }
 }
+
+
+void src_manager_write_addr_table(std::ostream& os){
+    // 遍历所有已注册资源，输出其地址表信息
+    for (const auto& item : src_item_array) {
+        // 如果该资源有自己的地址表（如字体的每个字符），则逐项写入
+        if (!item.addr_table.empty()) {
+            for (const auto& addr_item : item.addr_table) {
+                os.write(reinterpret_cast<const char*>(&addr_item), sizeof(addr_item));
+            }
+        } else {
+            // 没有子地址表的资源，构造一个地址表项
+            src_addr_item_t addr_item;
+            memset(&addr_item, 0, sizeof(addr_item));
+            // 这里假设 name 不会超长
+            strncpy_s(addr_item.name, item.name.c_str(), sizeof(addr_item.name) - 1);
+            addr_item.name[sizeof(addr_item.name) - 1] = '\0';
+            addr_item.id = 0; // 可根据实际需求分配唯一ID
+            addr_item.parent_id = 0;
+            addr_item.start_addr = static_cast<uint32_t>(item.satrt_addr);
+            addr_item.size = static_cast<uint32_t>(item.data_byte_count);
+            addr_item.type = static_cast<uint16_t>(item.type);
+            addr_item.char_code = 0;
+            os.write(reinterpret_cast<const char*>(&addr_item), sizeof(addr_item));
+        }
+    }
+    std::cout << "资源地址表已写入输出流。" << std::endl;
+}
+
 
 // 数据验证函数，返回 true 表示校验通过，false 表示有错误
 bool src_manager_verify_data() {
@@ -423,6 +537,7 @@ bool src_manager_verify_data() {
 }
 
 
+// void 结构体src_manager_write_head(src_head_t head_data, src){}
 
 
 
@@ -430,18 +545,139 @@ bool src_manager_verify_data() {
 
 
 
-/* 大端写法：高字节在前  */
-void write_big_endian(std::ofstream& outfile, uint16_t v) {
-    uint8_t high = (v >> 8) & 0xFF;
-    uint8_t low = v & 0xFF;
-    outfile.put(high);
-    outfile.put(low);
+
+
+///* 大端写法：高字节在前  */
+//void write_big_endian(std::ofstream& outfile, uint16_t v) {
+//    uint8_t high = (v >> 8) & 0xFF;
+//    uint8_t low = v & 0xFF;
+//    outfile.put(high);
+//    outfile.put(low);
+//}
+//
+///* 小端写法：低字节在前 */
+//void write_little_endian(std::ofstream& outfile, uint16_t v) {
+//    uint8_t low = v & 0xFF;
+//    uint8_t high = (v >> 8) & 0xFF;
+//    outfile.put(low);
+//    outfile.put(high);
+//}
+//
+
+constexpr const char* OUT_FILE_NAME = "output/MQ2_V1.bin";
+constexpr const char* LOG_FILE_NAME = "log/MQ2_V1.txt";
+
+void name_add_time_str(std::string* bin_file_name, std::string* log_file_name) {
+
+
+    std::time_t now = std::time(nullptr);
+    std::tm local_tm = { 0 };
+#if defined(_MSC_VER)
+    localtime_s(&local_tm, &now);
+#else
+    localtime_r(&now, &local_tm);
+#endif
+    char datetime_buf[32] = { 0 };
+    std::strftime(datetime_buf, sizeof(datetime_buf), "%Y-%m-%d %H:%M:%S", &local_tm);
+
+    // 在文件名后面加上当前日期时间（如 output/new_demo_20240608_153000.bin）
+    char out_file_name_with_time[128] = { 0 };
+    std::strftime(datetime_buf, sizeof(datetime_buf), "%Y-%m-%d %H:%M:%S", &local_tm);
+    char date_for_file[32] = { 0 };
+    std::strftime(date_for_file, sizeof(date_for_file), "_%Y%m%d_%H%M%S", &local_tm);
+
+    std::string base_name = OUT_FILE_NAME;
+    size_t dot_pos = base_name.find_last_of('.');
+    std::string file_name_with_time;
+    if (dot_pos != std::string::npos) {
+        file_name_with_time = base_name.substr(0, dot_pos) + date_for_file + base_name.substr(dot_pos);
+    }
+    else {
+        file_name_with_time = base_name + date_for_file;
+    }
+
+    // 日志文件名也加上时间戳
+    std::string log_base_name = LOG_FILE_NAME;
+    size_t log_dot_pos = log_base_name.find_last_of('.');
+    std::string log_file_name_with_time;
+    if (log_dot_pos != std::string::npos) {
+        log_file_name_with_time = log_base_name.substr(0, log_dot_pos) + date_for_file + log_base_name.substr(log_dot_pos);
+    }
+    else {
+        log_file_name_with_time = log_base_name + date_for_file;
+    }
+
+
+    // 将带时间戳的文件名写回传入的字符串指针
+    if (bin_file_name) {
+        *bin_file_name = file_name_with_time;
+    }
+    if (log_file_name) {
+        *log_file_name = log_file_name_with_time;
+    }
+
+
 }
 
-/* 小端写法：低字节在前 */
-void write_little_endian(std::ofstream& outfile, uint16_t v) {
-    uint8_t low = v & 0xFF;
-    uint8_t high = (v >> 8) & 0xFF;
-    outfile.put(low);
-    outfile.put(high);
+
+
+/// 构建资源地址表（将所有资源的地址信息填充到 addr_table）
+void build_src_addr_table(src_item_t& src_item){
+    uint32_t addr_item_id = 1;  // 最小是1  0 表示顶级
+    src_addr_item_t item;
+
+    if(src_item.type == is_image){
+        item.id = addr_item_id++;
+        item.parent_id = 0;
+        item.start_addr = src_item.satrt_addr;
+        item.size = src_item.data_byte_count;
+        item.type = src_item.type;
+        item.char_code = 0;
+        strncpy_s(item.name, src_item.name.c_str(), sizeof(item.name) - 1);
+        item.name[sizeof(item.name) - 1] = '\0';
+        src_item.addr_table.push_back(item);
+    }
+    else if(src_item.type == is_font){
+        // 字体类型，每个字符都生成一个地址表项
+        const tFont* font = static_cast<const tFont*>(src_item.data);
+        if(font && font->chars) {
+            for(int i = 0; i < font->length; ++i) {
+                const tChar& ch = font->chars[i];
+                const tImage* img = ch.image;
+                if(img) {
+                    src_addr_item_t font_item;
+                    font_item.id = addr_item_id++;
+                    font_item.parent_id = 0; // 可根据需要设置父ID
+                    // 计算每个字符的起始地址
+                    size_t char_offset = 0;
+                    for(int j = 0; j < i; ++j) {
+                        const tImage* prev_img = font->chars[j].image;
+                        if(prev_img) {
+                            size_t bits = prev_img->width * prev_img->height * prev_img->dataSize;
+                            size_t bytes = (bits + 7) / 8;
+                            char_offset += bytes;
+                        }
+                    }
+                    font_item.start_addr = src_item.satrt_addr + char_offset;
+                    size_t bits = img->width * img->height * img->dataSize;
+                    size_t bytes = (bits + 7) / 8;
+                    font_item.size = bytes;
+                    font_item.type = is_font_char;
+                    font_item.char_code = static_cast<uint16_t>(ch.code);
+                    // 名称格式：Font_原字体名_0x十六进制字符编码
+                    char hex_code[16];
+                    snprintf(hex_code, sizeof(hex_code), "0x%lx", ch.code);
+                    std::string char_name = "Font_" + src_item.name + "_" + hex_code;
+                    strncpy_s(font_item.name, char_name.c_str(), sizeof(font_item.name) - 1);
+                    font_item.name[sizeof(font_item.name) - 1] = '\0';
+                    src_item.addr_table.push_back(font_item);
+                }
+            }
+        }
+    }
+
+    else if(src_item.type == is_audio){
+
+
+    }
 }

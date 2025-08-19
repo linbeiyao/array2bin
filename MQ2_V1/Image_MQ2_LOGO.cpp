@@ -26,7 +26,7 @@
      } tImage;
 */
 #include <stdint.h>
-#include "src_manager.hpp"
+#include "../include_src.hpp"
 
 // 4704 * 2 = 9408
 static const uint16_t image_data_logo_MQ[4704] = {
