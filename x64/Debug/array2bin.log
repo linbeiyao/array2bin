@@ -1,7 +1,4 @@
-﻿  src_manager.cpp
-C:\Users\Linbei\Documents\Code\array2bin\array2bin\array2bin\src_manager.cpp(117,65): warning C4267: “=”: 从“size_t”转换到“uint32_t”，可能丢失数据
-C:\Users\Linbei\Documents\Code\array2bin\array2bin\array2bin\src_manager.cpp(651,35): warning C4267: “=”: 从“size_t”转换到“uint32_t”，可能丢失数据
-C:\Users\Linbei\Documents\Code\array2bin\array2bin\array2bin\src_manager.cpp(652,29): warning C4267: “=”: 从“size_t”转换到“uint32_t”，可能丢失数据
-C:\Users\Linbei\Documents\Code\array2bin\array2bin\array2bin\src_manager.cpp(680,64): warning C4267: “=”: 从“size_t”转换到“uint32_t”，可能丢失数据
-C:\Users\Linbei\Documents\Code\array2bin\array2bin\array2bin\src_manager.cpp(683,38): warning C4267: “=”: 从“size_t”转换到“uint32_t”，可能丢失数据
+﻿  Font_MQ2_CN_22.cpp
+C:\Users\Linbei\Documents\Code\array2bin\array2bin\array2bin\MQ2_V1\Font_MQ2_CN_22.cpp(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+C:\Users\Linbei\Documents\Code\array2bin\array2bin\array2bin\MQ2_V1\Font_MQ2_CN_22.cpp(2019,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
   array2bin.vcxproj -> C:\Users\Linbei\Documents\Code\array2bin\array2bin\x64\Debug\array2bin.exe
